@@ -1,0 +1,37 @@
+/* Button Styling */
+.my-draw-extension-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-right: 8px; /* Adjust spacing as needed */
+    transition: background-color 0.2s;
+    color: currentColor; /* Inherit text color from parent */
+    opacity: 0.7;
+}
+
+.my-draw-extension-trigger-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    opacity: 1;
+}
+
+/* Specific adjustments for dark mode might be needed, 
+   but 'currentColor' and semi-transparent backgrounds usually work well. */
+
+/* SVG Icon styling */
+.my-draw-extension-trigger-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Modal Root - helper to ensure high z-index and isolation if needed */
+#my-draw-extension-modal-root {
+    position: relative;
+    z-index: 2147483647; /* Max z-index */
+}

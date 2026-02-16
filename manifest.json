@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "AI Chat Draw Utility",
+  "version": "1.0",
+  "description": "Insert Excalidraw drawings into AI chat interfaces.",
+  "permissions": ["activeTab", "clipboardWrite"],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://bard.google.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["src/content/index.jsx"],
+      "css": ["src/content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
