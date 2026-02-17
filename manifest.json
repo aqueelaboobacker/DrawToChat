@@ -5,7 +5,19 @@
   "description": "Insert Excalidraw drawings into AI chat interfaces.",
   "permissions": ["activeTab", "clipboardWrite"],
   "action": {
-    "default_popup": "index.html"
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "public/icon_16.png",
+      "32": "public/icon_32.png",
+      "48": "public/icon_48.png",
+      "128": "public/icon_128.png"
+    }
+  },
+  "icons": {
+      "16": "public/icon_16.png",
+      "32": "public/icon_32.png",
+      "48": "public/icon_48.png",
+      "128": "public/icon_128.png"
   },
   "content_scripts": [
     {
