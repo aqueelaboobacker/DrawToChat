@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Excalidraw, exportToBlob } from "@excalidraw/excalidraw";
+import PaywallModal from './PaywallModal';
+import { licenseManager } from './license';
 
 const modalStyles = {
     position: 'fixed',
@@ -60,13 +62,48 @@ const insertBtnStyles = {
     color: 'white'
 };
 
+const proBadgeStyles = {
+    padding: '4px 8px',
+    backgroundColor: '#ffd43b',
+    color: '#000',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    marginRight: 'auto'
+};
+
+const freeBadgeStyles = {
+    padding: '4px 8px',
+    backgroundColor: '#e9ecef',
+    color: '#495057',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    marginRight: 'auto'
+};
+
 export default function DrawingModal({ onClose, onInsertDrawing }) {
     const [excalidrawAPI, setExcalidrawAPI] = useState(null);
     const excalidrawWrapperRef = useRef(null);
+    const [isPro, setIsPro] = useState(false);
+    const [remainingFree, setRemainingFree] = useState(5);
+    const [showPaywall, setShowPaywall] = useState(false);
 
     // Prevent scrolling of background body when modal is open
     useEffect(() => {
         document.body.style.overflow = 'hidden';
+
+        // Check license status
+        const checkStatus = async () => {
+            const pro = await licenseManager.isPro();
+            setIsPro(pro);
+            if (!pro) {
+                const remaining = await licenseManager.getRemainingFree();
+                setRemainingFree(remaining);
+            }
+        };
+        checkStatus();
+
         return () => {
             document.body.style.overflow = '';
         };
@@ -74,6 +111,12 @@ export default function DrawingModal({ onClose, onInsertDrawing }) {
 
     const handleSave = async () => {
         if (!excalidrawAPI) return;
+
+        // Check License Limits
+        if (!isPro && remainingFree <= 0) {
+            setShowPaywall(true);
+            return;
+        }
 
         const elements = excalidrawAPI.getSceneElements();
         if (!elements || elements.length === 0) {
@@ -93,12 +136,23 @@ export default function DrawingModal({ onClose, onInsertDrawing }) {
                 files: excalidrawAPI.getFiles(),
             });
 
+            // Increment usage if not pro
+            if (!isPro) {
+                await licenseManager.incrementUsage();
+            }
+
             onInsertDrawing(blob);
             onClose();
         } catch (error) {
             console.error("Error exporting drawing:", error);
             alert("Failed to export drawing. Please try again.");
         }
+    };
+
+    const handlePaywallSuccess = () => {
+        setIsPro(true);
+        setShowPaywall(false);
+        alert("License Activated! You are now a Pro user.");
     };
 
     return (
@@ -112,8 +166,22 @@ export default function DrawingModal({ onClose, onInsertDrawing }) {
                         excalidrawAPI={(api) => setExcalidrawAPI(api)}
                         theme="light"
                     />
+                    {showPaywall && (
+                        <PaywallModal
+                            onClose={() => setShowPaywall(false)}
+                            onSuccess={handlePaywallSuccess}
+                        />
+                    )}
                 </div>
                 <div style={toolbarStyles}>
+                    {isPro ? (
+                        <div style={proBadgeStyles}>PRO MEMBER</div>
+                    ) : (
+                        <div style={freeBadgeStyles}>
+                            {remainingFree} free drawings left
+                        </div>
+                    )}
+
                     <button
                         onClick={onClose}
                         style={cancelBtnStyles}

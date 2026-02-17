@@ -149,19 +149,55 @@ function handleGeminiDropdown() {
     clonedRow.classList.add('my-draw-extension-menu-item');
 
     // Replace text
-    replaceTextInNode(clonedRow, 'Upload files', 'Draw with Excalidraw');
-    replaceTextInNode(clonedRow, 'Upload image', 'Draw with Excalidraw');
+    replaceTextInNode(clonedRow, 'Upload files', 'DrawToChat');
+    replaceTextInNode(clonedRow, 'Upload image', 'DrawToChat');
 
-    // Replace Icon
-    const svg = clonedRow.querySelector('svg');
-    if (svg) {
-        const newSvg = document.createElement('span');
-        newSvg.innerHTML = `
-         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor" class="${svg.getAttribute('class')}">
-            <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
-         </svg>
-         `;
-        if (newSvg.firstElementChild) svg.replaceWith(newSvg.firstElementChild);
+    // Improve Icon Replacement Logic
+    // Find the element containing the text "Draw with Excalidraw"
+    // The icon is likely the element before it.
+    let textContainer = null;
+    const walker = document.createTreeWalker(clonedRow, NodeFilter.SHOW_TEXT, null, false);
+    while (walker.nextNode()) {
+        if (walker.currentNode.nodeValue.includes('DrawToChat')) {
+            textContainer = walker.currentNode.parentElement;
+            break;
+        }
+    }
+
+    // 2. Remove all existing siblings/children that are NOT the text container
+    // This is safer than trying to find a specific SVG selector that might fail
+    if (textContainer) {
+        Array.from(clonedRow.children).forEach(child => {
+            if (child !== textContainer && !child.contains(textContainer)) {
+                child.remove();
+            }
+        });
+    }
+
+    const newIconHtml = `
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor" class="my-draw-icon" style="margin-right: 12px;">
+       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+    </svg>
+    `;
+    const iconSpan = document.createElement('span');
+    iconSpan.style.display = 'flex'; // Ensure flex centering
+    iconSpan.style.alignItems = 'center';
+    iconSpan.innerHTML = newIconHtml;
+    const iconElement = iconSpan;
+
+    if (textContainer) {
+        // Look for siblings before the text container
+        // Insert before text container
+        textContainer.parentElement.insertBefore(iconElement, textContainer);
+        // Ensure parent is flex for row alignment
+        textContainer.parentElement.style.display = 'flex';
+        textContainer.parentElement.style.alignItems = 'center';
+    } else {
+        // Fallback: prepend to row
+        console.log("Draw Extension: Text container not found (weird), prepending icon to row");
+        clonedRow.insertBefore(iconElement, clonedRow.firstChild);
+        clonedRow.style.display = 'flex';
+        clonedRow.style.alignItems = 'center';
     }
 
     clonedRow.onclick = (e) => {
@@ -192,7 +228,7 @@ function handleClaudeDropdown() {
     const clonedRow = menuRow.cloneNode(true);
     clonedRow.classList.add('my-draw-extension-menu-item');
 
-    replaceTextInNode(clonedRow, 'Add files or photos', 'Draw with Excalidraw');
+    replaceTextInNode(clonedRow, 'Add files or photos', 'DrawToChat');
 
     // Replace Icon
     const svg = clonedRow.querySelector('svg');
@@ -258,8 +294,8 @@ function handleChatGPTDropdown() {
     // But cloning is better to keep icons structure. Let's try to update "Add photos & files" text in the clone.
 
     // Change text
-    replaceTextInNode(clonedRow, 'Add photos & files', 'Draw with Excalidraw');
-    replaceTextInNode(clonedRow, 'Create image', 'Draw with Excalidraw'); // In case we cloned that one
+    replaceTextInNode(clonedRow, 'Add photos & files', 'DrawToChat');
+    replaceTextInNode(clonedRow, 'Create image', 'DrawToChat'); // In case we cloned that one
 
     // Update Icon
     // Look for the SVG and replace it
@@ -307,7 +343,7 @@ function replaceTextInNode(node, searchText, replacementText) {
 function injectButton(container) {
     const buttonBtn = document.createElement('button');
     buttonBtn.className = 'my-draw-extension-trigger-btn';
-    buttonBtn.title = "Draw and Insert Image";
+    buttonBtn.title = "DrawToChat";
     // Simple Pencil SVG
     buttonBtn.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
