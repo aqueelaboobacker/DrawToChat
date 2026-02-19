@@ -1,8 +1,6 @@
 
-const LS_API_URL = 'https://api.lemonsqueezy.com/v1/licenses/activate';
+// Dodo Payments API handled in background.js
 const FREE_LIMIT = 3; // 3 free drawings to get them hooked
-
-const LS_API_VALIDATE_URL = 'https://api.lemonsqueezy.com/v1/licenses/validate';
 
 export const licenseManager = {
     // ... items above ...
@@ -57,16 +55,16 @@ export const licenseManager = {
 
             const data = response.data;
 
-            if (data.activated) {
-                await chrome.storage.local.set({
+            if (response.success && data) {
+                 await chrome.storage.local.set({
                     licenseKey: key,
                     licenseStatus: 'active',
-                    instanceId: data.instance.id,
+                    instanceId: data.id,
                     lastValidated: Date.now()
                 });
                 return { success: true };
             } else {
-                return { success: false, error: data.error || 'Invalid license key' };
+                return { success: false, error: data?.error || 'Invalid license key' };
             }
         } catch (error) {
             console.error('License activation error:', error);

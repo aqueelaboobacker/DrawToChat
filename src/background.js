@@ -1,9 +1,9 @@
 
 // Background Service Worker for DrawToChat
-// Handles cross-origin requests to Lemon Squeezy to avoid CORS issues in content scripts.
+// Handles cross-origin requests to Dodo Payments to avoid CORS issues in content scripts.
 
-const LS_API_URL = 'https://api.lemonsqueezy.com/v1/licenses/activate';
-const LS_API_VALIDATE_URL = 'https://api.lemonsqueezy.com/v1/licenses/validate';
+const DODO_API_URL = 'https://test.dodopayments.com/licenses/activate';
+const DODO_API_VALIDATE_URL = 'https://test.dodopayments.com/licenses/validate';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'ACTIVATE_LICENSE') {
@@ -18,16 +18,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function handleActivation(key, instanceName) {
     try {
-        const formData = new FormData();
-        formData.append('license_key', key);
-        formData.append('instance_name', instanceName);
-
-        const response = await fetch(LS_API_URL, {
+        const response = await fetch(DODO_API_URL, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                license_key: key,
+                name: instanceName
+            })
         });
 
         const data = await response.json();
+
+        if (!response.ok) {
+             throw new Error(data.message || 'Activation failed');
+        }
+
         return { success: true, data };
     } catch (error) {
         console.error('Background: Activation error', error);
@@ -37,15 +44,22 @@ async function handleActivation(key, instanceName) {
 
 async function handleValidation(key) {
     try {
-        const formData = new FormData();
-        formData.append('license_key', key);
-
-        const response = await fetch(LS_API_VALIDATE_URL, {
+        const response = await fetch(DODO_API_VALIDATE_URL, {
             method: 'POST',
-            body: formData
+            headers: {
+                 'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                license_key: key
+            })
         });
 
         const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Validation failed');
+        }
+
         return { success: true, data };
     } catch (error) {
         console.error('Background: Validation error', error);
