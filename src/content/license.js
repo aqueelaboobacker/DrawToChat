@@ -1,6 +1,6 @@
 
 const LS_API_URL = 'https://api.lemonsqueezy.com/v1/licenses/activate';
-const FREE_LIMIT = 5; // 5 free drawings to get them hooked
+const FREE_LIMIT = 3; // 3 free drawings to get them hooked
 
 const LS_API_VALIDATE_URL = 'https://api.lemonsqueezy.com/v1/licenses/validate';
 
@@ -43,17 +43,19 @@ export const licenseManager = {
     },
 
     async activateLicense(key, instanceName = 'DrawToChat-Extension') {
+        // Delegate to background script to avoid CORS
         try {
-            const formData = new FormData();
-            formData.append('license_key', key);
-            formData.append('instance_name', instanceName);
-
-            const response = await fetch(LS_API_URL, {
-                method: 'POST',
-                body: formData
+            const response = await chrome.runtime.sendMessage({
+                action: 'ACTIVATE_LICENSE',
+                key,
+                instanceName
             });
 
-            const data = await response.json();
+            if (!response || !response.success) {
+                 return { success: false, error: response?.error || 'Network error occurred' };
+            }
+
+            const data = response.data;
 
             if (data.activated) {
                 await chrome.storage.local.set({
@@ -68,22 +70,21 @@ export const licenseManager = {
             }
         } catch (error) {
             console.error('License activation error:', error);
-            return { success: false, error: 'Network error occurred' };
+            return { success: false, error: 'Extension error occurred' };
         }
     },
 
     async validateLicense(key) {
         try {
-             const formData = new FormData();
-             formData.append('license_key', key);
-             // Logic to use previously saved instance_id if possible, or just validate key
-             
-             const response = await fetch(LS_API_VALIDATE_URL, {
-                 method: 'POST',
-                 body: formData
+             // Delegate to background script
+             const response = await chrome.runtime.sendMessage({
+                 action: 'VALIDATE_LICENSE',
+                 key
              });
              
-             const data = await response.json();
+             if (!response || !response.success) return; // Silent fail on network error
+
+             const data = response.data;
              
              if (data.valid) {
                  await chrome.storage.local.set({ 
@@ -97,7 +98,6 @@ export const licenseManager = {
              }
         } catch (e) {
             console.error("Re-validation failed (network?)", e);
-            // Optional: allow grace period if network fails?
         }
     }
 };

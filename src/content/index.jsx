@@ -4,6 +4,8 @@ import DrawingModal from './DrawingModal';
 import './styles.css';
 
 // 1. Configuration for different sites
+window.EXCALIDRAW_ASSET_PATH = chrome.runtime.getURL('assets/excalidraw/');
+
 const SITE_CONFIG = [
     {
         domain: 'chatgpt.com',
