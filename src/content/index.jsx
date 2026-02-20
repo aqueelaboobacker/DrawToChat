@@ -1,11 +1,10 @@
+import './env';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import DrawingModal from './DrawingModal';
 import './styles.css';
 
 // 1. Configuration for different sites
-window.EXCALIDRAW_ASSET_PATH = chrome.runtime.getURL('assets/excalidraw/');
-
 const SITE_CONFIG = [
     {
         domain: 'chatgpt.com',
@@ -25,13 +24,13 @@ const SITE_CONFIG = [
         // Claude usually has a clear input container
         containerSelector: '.ProseMirror',
         appendMethod: 'dropdown-menu', // Updated to dropdown
-        inputSelector: '[contenteditable="true"]'
+        inputSelector: '.ProseMirror[contenteditable="true"]'
     },
     {
         domain: 'gemini.google.com',
         containerSelector: '.input-area', // logic to find the input area
         appendMethod: 'dropdown-menu',
-        inputSelector: '[contenteditable="true"]'
+        inputSelector: 'rich-textarea[contenteditable="true"], .rich-textarea[contenteditable="true"], [contenteditable="true"]'
     }
     // Add others here...
 ];
@@ -445,13 +444,37 @@ async function handleInsertDrawing(imageBlob) {
     console.log("Draw Extension: Handle Insert Drawing", imageBlob);
 
     // 1. Find the input again
-    let inputElement = null;
+    let inputElements = [];
     if (currentConfig.inputSelector) {
-        inputElement = document.querySelector(currentConfig.inputSelector);
+        inputElements = Array.from(document.querySelectorAll(currentConfig.inputSelector));
     }
 
-    if (!inputElement) {
-        inputElement = document.querySelector('[contenteditable="true"]');
+    if (inputElements.length === 0) {
+        inputElements = Array.from(document.querySelectorAll('[contenteditable="true"]'));
+    }
+
+    // Filter out hidden or non-interactive elements (like caption inputs inside attachments)
+    // Often, the main chatbox is the *first* visible textarea or ProseMirror editor that is large,
+    // or sometimes the *last* depending on DOM structure. 
+    // Usually, the one with an aria-label "Message" or similar is best.
+    let inputElement = inputElements.find(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 &&
+            (el.getAttribute('id') === 'prompt-textarea' || // ChatGPT
+                el.classList.contains('ProseMirror') || // Claude
+                el.closest('rich-textarea') !== null || el.tagName.toLowerCase() === 'rich-textarea'); // Gemini
+    });
+
+    // Fallback if the strict filter above fails
+    if (!inputElement && inputElements.length > 0) {
+        // Try to filter visible
+        const visibleElements = inputElements.filter(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        });
+
+        // Assume the first visible is the correct one if we can't find specific classes
+        inputElement = visibleElements.length > 0 ? visibleElements[0] : inputElements[0];
     }
 
     if (!inputElement) {
@@ -466,46 +489,57 @@ async function handleInsertDrawing(imageBlob) {
     inputElement.focus();
 
     try {
-        // 3. Create clipboard item
-        const data = [new ClipboardItem({ [imageBlob.type]: imageBlob })];
+        // Create unique filename to support multiple drawings
+        // If the filename is static (e.g., "image.png"), ChatGPT/Claude will discard
+        // the second image as a duplicate attachment block.
+        const uniqueFileName = `drawing-${Date.now()}.png`;
 
-        // 4. Write to clipboard
-        await navigator.clipboard.write(data);
-        console.log("Draw Extension: Image written to clipboard.");
+        // We dispatch a Paste Event manually with DataTransfer FIRST.
+        // It provides much more reliable cross-browser behavior than execCommand('paste')
+        // and allows us to explicitly define the filename.
+        try {
+            const dataTransfer = new DataTransfer();
+            const file = new File([imageBlob], uniqueFileName, { type: "image/png" });
+            dataTransfer.items.add(file);
 
-        showToast("Image copied to clipboard! Paste it into the chat if it doesn't appear.");
+            const pasteEvent = new ClipboardEvent('paste', {
+                bubbles: true,
+                cancelable: true,
+                clipboardData: dataTransfer
+            });
 
-        // 5. Trigger paste
-        const pasteSuccess = document.execCommand('paste');
-        console.log("Draw Extension: execCommand paste success?", pasteSuccess);
+            const eventHandled = !inputElement.dispatchEvent(pasteEvent);
+            console.log("Draw Extension: Manual paste event dispatched.", eventHandled ? "Handled by SPA." : "Not handled by SPA (default behavior).");
 
-        if (!pasteSuccess) {
-            console.warn("execCommand('paste') failed. Attempting manual dispatch.");
+            if (!eventHandled) {
+                // If it wasn't intercepted, fallback to execCommand
+                console.warn("Draw Extension: SPA didn't prevent default on paste event. Falling back to execCommand.");
 
-            // Dispatch a Paste Event manually with DataTransfer
+                // Create clipboard item
+                const data = [new ClipboardItem({ [imageBlob.type]: imageBlob })];
+                await navigator.clipboard.write(data);
+
+                document.execCommand('paste');
+            } else {
+                showToast("Image inserted!");
+            }
+
+        } catch (e) {
+            console.error("Failed to dispatch manual paste:", e);
+
+            // Final Fallback: just write to clipboard and ask user to paste.
             try {
-                const dataTransfer = new DataTransfer();
-                const file = new File([imageBlob], "drawing.png", { type: "image/png" });
-                dataTransfer.items.add(file);
-
-                const pasteEvent = new ClipboardEvent('paste', {
-                    bubbles: true,
-                    cancelable: true,
-                    clipboardData: dataTransfer
-                });
-
-                inputElement.dispatchEvent(pasteEvent);
-                console.log("Draw Extension: Manual paste event dispatched with DataTransfer.");
-                showToast("Image inserted via event simulation!");
-            } catch (e) {
-                console.error("Failed to dispatch manual paste:", e);
-                showToast("Auto-paste failed. Please Ctrl+V.", "error");
+                const data = [new ClipboardItem({ [imageBlob.type]: imageBlob })];
+                await navigator.clipboard.write(data);
+                showToast("Auto-paste failed. Copied to clipboard. Please Ctrl+V or Command+V.");
+            } catch (err) {
+                showToast("Failed to write to clipboard.", "error");
             }
         }
 
     } catch (err) {
-        console.error('Draw Extension: Failed to paste image:', err);
-        showToast('Failed to access clipboard. See console.', 'error');
+        console.error('Draw Extension: Failed to process image:', err);
+        showToast('Failed to process image. See console.', 'error');
     }
 }
 
