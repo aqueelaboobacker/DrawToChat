@@ -272,8 +272,27 @@ export default function DrawingModal({ onClose, onInsertDrawing }) {
                     {isPro ? (
                         <div style={proBadgeStyles}>PRO MEMBER</div>
                     ) : (
-                        <div style={freeBadgeStyles}>
-                            {remainingFree} free drawings left
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: 'auto' }}>
+                            <div style={{ ...freeBadgeStyles, marginRight: 0 }}>
+                                {remainingFree} free drawings left
+                            </div>
+                            <button
+                                onClick={() => setShowPaywall(true)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#228be6',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    fontWeight: '600',
+                                    textDecoration: 'none',
+                                    padding: 0
+                                }}
+                                onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                                onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                            >
+                                Upgrade to Pro ✨
+                            </button>
                         </div>
                     )}
 

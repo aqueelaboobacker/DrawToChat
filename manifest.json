@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DrawToChat",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Insert Excalidraw drawings into AI chat interfaces.",
   "permissions": ["clipboardWrite", "storage"],
   "action": {

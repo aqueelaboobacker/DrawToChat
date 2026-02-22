@@ -1,9 +1,7 @@
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { GridPattern } from "@/components/magicui/grid-pattern";
-import { Bot, Zap, Layout, PenTool, CheckCircle2 } from "lucide-react";
+import { Bot, Zap, Layout } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 const features = [
     {
@@ -37,7 +35,7 @@ export function Features() {
                     Supercharge your AI Chat
                 </h2>
                 <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-                    Don't just text. Show. DrawToChat brings visual communication to your LLM workflow.
+                    Don&apos;t just text. Show. DrawToChat brings visual communication to your LLM workflow.
                 </p>
             </div>
 

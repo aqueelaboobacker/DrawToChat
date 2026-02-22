@@ -2,8 +2,8 @@
 // Background Service Worker for DrawToChat
 // Handles cross-origin requests to Dodo Payments to avoid CORS issues in content scripts.
 
-const DODO_API_URL = 'https://test.dodopayments.com/licenses/activate';
-const DODO_API_VALIDATE_URL = 'https://test.dodopayments.com/licenses/validate';
+const DODO_API_URL = 'https://live.dodopayments.com/licenses/activate';
+const DODO_API_VALIDATE_URL = 'https://live.dodopayments.com/licenses/validate';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'ACTIVATE_LICENSE') {

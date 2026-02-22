@@ -9,7 +9,7 @@ export default function Support() {
                 <h1 className="text-4xl font-bold text-white mb-8">Support</h1>
                 <div className="space-y-6 text-zinc-400">
                     <p>
-                        Need help with DrawToChat? We're here to assist you.
+                        Need help with DrawToChat? We&apos;re here to assist you.
                     </p>
 
                     <section>
@@ -30,7 +30,7 @@ export default function Support() {
                         <div className="space-y-4">
                             <div>
                                 <h3 className="font-medium text-white">How do I verify my license?</h3>
-                                <p>Click the extension icon in the toolbar, enter your key from Lemon Squeezy, and click "Activate".</p>
+                                <p>Click the extension icon in the toolbar, enter your key from Lemon Squeezy, and click &quot;Activate&quot;.</p>
                             </div>
                             <div>
                                 <h3 className="font-medium text-white">Does it work on all websites?</h3>

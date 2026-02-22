@@ -47,7 +47,7 @@ const linkStyles = {
     display: 'block'
 };
 
-const BUY_LINK = "https://test.checkout.dodopayments.com/buy/pdt_0NYpQ921YgiMHl5riH0Qy?quantity=1";
+const BUY_LINK = "https://checkout.dodopayments.com/buy/pdt_0NYpmj94TWF3jzjlAgZfp?quantity=1";
 
 
 export default function PaywallModal({ onClose, onSuccess }) {

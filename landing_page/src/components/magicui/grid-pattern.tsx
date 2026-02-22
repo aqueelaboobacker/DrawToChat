@@ -9,7 +9,7 @@ interface GridPatternProps {
     squares?: Array<[x: number, y: number]>;
     strokeDasharray?: string;
     className?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export function GridPattern({

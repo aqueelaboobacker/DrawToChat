@@ -11,7 +11,7 @@ export function Showcase() {
                         Power of Excalidraw <br /> inside your Chat
                     </h2>
                     <p className="text-muted-foreground text-lg">
-                        Don't just tell AI what you want—show it. Our extension brings a full-featured whiteboard directly into your conversation.
+                        Don&apos;t just tell AI what you want—show it. Our extension brings a full-featured whiteboard directly into your conversation.
                     </p>
                     <ul className="grid gap-3">
                         {[

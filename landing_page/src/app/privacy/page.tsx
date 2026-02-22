@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
                     <section>
                         <h2 className="text-xl font-semibold text-white mb-2">1. Overview</h2>
                         <p>
-                            DrawToChat ("we", "our", or "us") respects your privacy.
+                            DrawToChat (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy.
                             This Privacy Policy explains how we handle your information when you use our Chrome Extension.
                         </p>
                     </section>
@@ -25,7 +25,7 @@ export default function PrivacyPolicy() {
                         </p>
                         <ul className="list-disc pl-5 mt-2 space-y-2">
                             <li>
-                                <strong>Drawings:</strong> Your drawings are stored locally on your device using Chrome's <code>local.storage</code> API. We do not transmit them to any server.
+                                <strong>Drawings:</strong> Your drawings are stored locally on your device using Chrome&apos;s <code>local.storage</code> API. We do not transmit them to any server.
                             </li>
                             <li>
                                 <strong>License Keys:</strong> If you purchase a Pro license, your license key is sent to Lemon Squeezy (our payment provider) strictly for verification purposes.
@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
                         <h2 className="text-xl font-semibold text-white mb-2">3. Third-Party Services</h2>
                         <p>
                             We use <strong>Lemon Squeezy</strong> to handle payments and license verification.
-                            Please refer to <a href="https://www.lemonsqueezy.com/privacy" className="text-blue-400 hover:underline">Lemon Squeezy's Privacy Policy</a> for details on how they handle payment information.
+                            Please refer to <a href="https://www.lemonsqueezy.com/privacy" className="text-blue-400 hover:underline">Lemon Squeezy&apos;s Privacy Policy</a> for details on how they handle payment information.
                         </p>
                     </section>
 
